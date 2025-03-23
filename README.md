@@ -1,6 +1,11 @@
-# React + Vite
+# React Audio Player
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern react audio player for development audio player base on website
+
+## Reference
+
+- https://github.com/mrtampan/javascript-audio-player
+- https://github.com/mrtampan/gitjomb
 
 Currently, two official plugins are available:
 

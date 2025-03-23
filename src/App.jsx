@@ -1,6 +1,6 @@
+import { shuffle } from 'lodash';
 import './App.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { shuffle } from 'lodash';
 
 const musicBank = window.location.origin + '/audio/';
 
@@ -9,7 +9,6 @@ const App = () => {
   const audioRef = useRef(null);
   const [playindex, setPlayindex] = useState(0);
   const [isPlaying, setIsPlaying] = useState('Play');
-  const [title, setTitle] = useState('');
   function getDataMusic() {
     fetch(musicBank + 'data.json', {
       method: 'GET',
@@ -17,11 +16,13 @@ const App = () => {
       .then((response) => response.json())
       .then((result) => {
         // shuffle playlist
-        setPlaylists(
-          shuffle(result.music).map((playlist) => {
-            return { name: playlist.name, source: playlist.source };
-          })
-        );
+        if (result.music) {
+          setPlaylists(
+            shuffle(result.music).map((playlist) => {
+              return { name: playlist.name, source: playlist.source };
+            })
+          );
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -30,7 +31,7 @@ const App = () => {
 
   useEffect(() => {
     getDataMusic();
-  }, [playindex]);
+  }, []);
 
   const playPause = () => {
     if (audioRef.current.paused) {
@@ -38,7 +39,6 @@ const App = () => {
     } else {
       audioRef.current.pause();
     }
-    setTitle(playlists[playindex].name);
     setIsPlaying(audioRef.current?.paused ? 'Play' : 'Pause');
   };
 
@@ -62,15 +62,26 @@ const App = () => {
     audioRef.current.play();
   };
 
+  const onChangeMusic = (e) => {
+    audioRef.current.pause();
+    setPlayindex(e.target.value);
+    audioRef.current.play();
+  };
+
+  const handleEnded = () => {
+    nextPlay();
+  };
+
   return (
     <div className="App">
       <div className="max-w-sm rounded overflow-hidden border-2 shadow-lg p-6">
         <div>
-          <div className="text-center font-semibold"> {title} </div>
           <div className="mt-2">
-            <select>
-              {playlists.map((playlist) => (
-                <option value={playlist.source}>{playlist.name}</option>
+            <select onChange={(e) => onChangeMusic(e)} value={playindex}>
+              {playlists.map((playlist, index) => (
+                <option key={index} value={index}>
+                  {playlist.name}
+                </option>
               ))}
             </select>
           </div>
@@ -81,6 +92,7 @@ const App = () => {
             controls="controls"
             src={musicBank + playlists[playindex]?.source}
             autoPlay="autoplay"
+            onEnded={handleEnded}
           />
           <div className="flex justify-between">
             <div
